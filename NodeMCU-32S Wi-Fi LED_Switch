@@ -1,16 +1,44 @@
-NodeMCU-32S Wi-Fi LED_Switch
+//NodeMCU-32S Wi-Fi LED_Switch
+#define BLYNK_TEMPLATE_ID "TMPL6iT36tErQ"
+#define BLYNK_TEMPLATE_NAME "Blynk esp32"
+#define BLYNK_AUTH_TOKEN "iZpjO9Bk3NbnmG3qOP2yheAaB-gxN8lV"
 
-照片
+#define BLYNK_PRINT Serial
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+ 
+char auth[] = BLYNK_AUTH_TOKEN;
+ 
+char ssid[] = "3795267";     //請填上你要讓ESP32連上的WiFi名稱
+char pass[] = "053795267"; //請填上你要讓ESP32連上的WiFi密碼
+ 
+BlynkTimer timer;
+ 
+ 
 
-程式碼
+BLYNK_WRITE(V1)
+{
+  int pinValue = param.asInt();
+  if(pinValue == 0){
+    digitalWrite(2, 0);
+  }
+  else if(pinValue == 1){
+    digitalWrite(2, 1);
+  }
+}
+ 
 
-```
-00
-0
-0
-0
-0
-
-0
-0
-```
+void setup()
+{
+  Serial.begin(115200);
+  Blynk.begin(auth, ssid, pass);
+  pinMode(2, OUTPUT);
+}
+ 
+void loop()
+{
+  Blynk.run();
+  timer.run();
+  //ledcWrite(ledChannel, dutyCycle);
+}
