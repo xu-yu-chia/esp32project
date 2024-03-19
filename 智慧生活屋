@@ -1,0 +1,79 @@
+#define BLYNK_TEMPLATE_ID "TMPL6iT36tErQ"
+#define BLYNK_TEMPLATE_NAME "Blynk esp32"
+#define BLYNK_AUTH_TOKEN "iZpjO9Bk3NbnmG3qOP2yheAaB-gxN8lV"
+#define BLYNK_PRINT Serial
+
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+#include <AHT10.h>
+
+AHT10 myAHT10(AHT10_ADDRESS_0X38);
+ 
+char auth[] = BLYNK_AUTH_TOKEN; 
+char ssid[] = "3795267";     //請填上你要讓ESP32連上的WiFi名稱
+char pass[] = "053795267"; //請填上你要讓ESP32連上的WiFi密碼
+ 
+BlynkTimer timer;
+
+double T,H,maxT=-999.0,minT=999.0,con;
+ 
+ 
+BLYNK_WRITE(V1)
+{
+  int pinValue = param.asInt();
+  if(pinValue == 0){
+    digitalWrite(4, 0);
+  }
+  else if(pinValue == 1){
+    digitalWrite(4, 1);
+  }
+}
+
+
+void myTimer() 
+{
+  Blynk.virtualWrite(V11,T);
+  Blynk.virtualWrite(V12,H);
+  Blynk.virtualWrite(V13,maxT);
+  Blynk.virtualWrite(V14,minT);
+  Blynk.virtualWrite(V15,con);
+}
+
+
+void setup()
+{
+  Serial.begin(115200);
+  myAHT10.begin();
+  Blynk.begin(auth, ssid, pass);
+  pinMode(4, OUTPUT);
+  pinMode(2, OUTPUT);
+  timer.setInterval(500L, myTimer); 
+}
+ 
+void loop()
+{
+  Blynk.run();
+  timer.run();
+  digitalWrite(2, 1);
+  double t = myAHT10.readTemperature();
+  double h = myAHT10.readHumidity();
+  T=t;
+  H=h;
+  maxT = max( T , maxT );
+  minT = min( T , minT );
+
+  //  T - ( 0.55 - 0.55f ) ( T - 58 )
+  
+  con =  T - (( 0.55 - 0.55 * H *0.01) * ( T - 58 ));
+
+  Serial.print("Temp: ");
+  Serial.print(t);
+  Serial.print("    ");
+  Serial.print("Humi: ");
+  Serial.print(h);
+  Serial.print("    ");
+  Serial.print("Confert: ");
+  Serial.println(con);
+  
+}
